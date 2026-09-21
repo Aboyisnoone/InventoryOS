@@ -1,0 +1,136 @@
+scalar Time
+scalar Any # For JSONB dynamic fields
+
+type User {
+  id: ID!
+  firebaseUid: String!
+  email: String!
+  displayName: String
+}
+
+type Business {
+  id: ID!
+  name: String!
+  category: String!
+  country: String
+  currency: String
+  configuration: BusinessConfiguration
+}
+
+type BusinessConfiguration {
+  id: ID!
+  configSchema: Any!
+  status: String!
+}
+
+type Supplier {
+  id: ID!
+  name: String!
+  contactName: String
+  email: String
+  phone: String
+}
+
+type Product {
+  id: ID!
+  sku: String
+  barcode: String
+  name: String!
+  description: String
+  supplier: Supplier
+  purchasePrice: Float
+  sellingPrice: Float
+  minStockThreshold: Float
+  dynamicFields: Any
+  balance: Float! # Resolved from inventory_balances
+}
+
+enum MovementType {
+  OPENING_STOCK
+  PURCHASE
+  SALE
+  RETURN
+  DAMAGE
+  LOSS
+  ADJUSTMENT
+  EXPIRY
+}
+
+type InventoryMovement {
+  id: ID!
+  product: Product!
+  user: User
+  type: MovementType!
+  quantityChange: Float!
+  balanceAfter: Float!
+  notes: String
+  createdAt: Time!
+}
+
+type Query {
+  me: User!
+  myBusiness: Business
+  products: [Product!]!
+  suppliers: [Supplier!]!
+  inventoryHistory(productId: ID): [InventoryMovement!]!
+}
+
+input CreateBusinessInput {
+  name: String!
+  category: String!
+  country: String
+  currency: String
+}
+
+input CreateProductInput {
+  name: String!
+  sku: String
+  barcode: String
+  description: String
+  supplierId: ID
+  purchasePrice: Float
+  sellingPrice: Float
+  minStockThreshold: Float
+  dynamicFields: Any
+  openingStock: Float
+}
+
+input UpdateProductInput {
+  id: ID!
+  name: String
+  sku: String
+  barcode: String
+  description: String
+  supplierId: ID
+  purchasePrice: Float
+  sellingPrice: Float
+}
+
+input CreateSupplierInput {
+  name: String!
+  contactName: String
+  email: String
+  phone: String
+}
+
+type Mutation {
+  # Phase 1
+  registerUser(firebaseUid: String!, email: String!, displayName: String): User!
+  
+  # Phase 2
+  createBusiness(input: CreateBusinessInput!): Business!
+  generateAIConfiguration(description: String!): String! # Returns JSON string
+  approveConfiguration(configSchema: Any!): BusinessConfiguration!
+  
+  # Phase 3
+  createSupplier(input: CreateSupplierInput!): Supplier!
+  createProduct(input: CreateProductInput!): Product!
+  updateProduct(input: UpdateProductInput!): Product!
+  recordMovement(productId: ID!, type: MovementType!, quantityChange: Float!, notes: String): InventoryMovement!
+  
+  # Phase 5
+  askInventoryAssistant(message: String!): String!
+  
+  # Phase 6
+  updateTelegramConfig(botToken: String!, chatId: String!): Boolean!
+}

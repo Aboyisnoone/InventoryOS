@@ -1,0 +1,26 @@
+# Node
+node_modules/
+.npm/
+.next/
+out/
+build/
+dist/
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Go binaries
+backend/inventory-saas-backend.exe
+backend/server.exe
+backend/gqlgen.exe
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
