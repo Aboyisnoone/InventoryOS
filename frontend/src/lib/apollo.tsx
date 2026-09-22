@@ -7,7 +7,7 @@ import { auth } from '@/lib/firebase';
 import React from 'react';
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:8080/query', // Go backend
+  uri: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/query', // Use env var in prod, fallback to local
 });
 
 const authLink = setContext(async (_, { headers }) => {
