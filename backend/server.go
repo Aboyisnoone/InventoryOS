@@ -36,6 +36,20 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
+	
+	// Auto-migrate the database schema if running for the first time
+	schemaBytes, err := os.ReadFile("db/schema.sql")
+	if err == nil {
+		_, err = conn.Exec(string(schemaBytes))
+		if err != nil {
+			log.Printf("Warning: Failed to execute schema.sql: %v", err)
+		} else {
+			log.Println("Database schema migrated successfully.")
+		}
+	} else {
+		log.Printf("Warning: Could not read db/schema.sql: %v", err)
+	}
+
 	queries := db.New(conn)
 
 	// 2. Setup Firebase Auth
